@@ -1,12 +1,12 @@
 # Time range between which the orders were placed.
 
-SELECT *,
+SELECT t.*,
   DATE_DIFF(last_order_date, first_order_date, day) AS total_days
 FROM
 (
   SELECT
-    MIN(extract(date from order_purchase_timestamp)) first_order_date,
-    MAX(extract(date from order_purchase_timestamp)) last_order_date,
+    MIN(extract(date FROM order_purchase_timestamp)) AS first_order_date,
+    MAX(extract(date FROM order_purchase_timestamp)) AS last_order_date,
   FROM `target.orders`
 )t;
 
@@ -70,15 +70,15 @@ SELECT
     WHEN EXTRACT(hour from order_purchase_timestamp) BETWEEN 13 and 18 THEN 'Afternoon'
     WHEN EXTRACT(hour from order_purchase_timestamp) BETWEEN 19 and 23 THEN 'Evening'
     WHEN EXTRACT(hour from order_purchase_timestamp) BETWEEN 0 and 3 THEN 'Night'
-   else 'Dawn' 
-   end) AS order_time,
-  count(*) AS order_count
+  ELSE 'Dawn' 
+  END) AS order_time,
+  COUNT(*) AS order_count
 FROM
   `target.orders`
 GROUP BY 
   order_time
 ORDER BY
-  order_count desc;
+  order_count DESC;
 
 -- Peak order times occur in the afternoon, between 1 PM and 6 PM. --
 
@@ -93,7 +93,7 @@ FROM `target.customer`
 GROUP BY 
   customer_state
 ORDER BY 
-  Cust_count desc;
+  Cust_count DESC;
 
 -- Most no. of customers are coming from state with code SP --
 
@@ -187,7 +187,7 @@ FROM
     GROUP BY
       customer_state
     ORDER BY
-      highest_rank asc
+      highest_rank ASC
     LIMIT 5
     ) AS H
 JOIN
@@ -208,7 +208,7 @@ JOIN
     GROUP BY
       customer_state
     ORDER BY
-      lowest_rank asc
+      lowest_rank ASC
     LIMIT 5
     ) AS L
 ON
@@ -226,7 +226,7 @@ SELECT
 FROM
   (SELECT
       customer_state,
-      ROUND(AVG(timestamp_diff(order_delivered_customer_date, order_purchase_timestamp, day)), 2) as avg_delivery_days,
+      ROUND(AVG(timestamp_diff(order_delivered_customer_date, order_purchase_timestamp, day)), 2) AS avg_delivery_days,
       DENSE_RANK() OVER (ORDER BY ROUND(AVG(timestamp_diff(order_delivered_customer_date, order_purchase_timestamp, day)), 2) DESC) AS highest_rank
     FROM
       `target.customer` c
@@ -248,7 +248,7 @@ JOIN
   (
     SELECT
       customer_state,
-      ROUND(AVG(timestamp_diff(order_delivered_customer_date, order_purchase_timestamp, day)), 2) as avg_delivery_days,
+      ROUND(AVG(timestamp_diff(order_delivered_customer_date, order_purchase_timestamp, day)), 2) AS avg_delivery_days,
       DENSE_RANK() OVER (ORDER BY ROUND(AVG(timestamp_diff(order_delivered_customer_date, order_purchase_timestamp, day)), 2) ASC) AS lowest_rank
     FROM
       `target.customer` c
@@ -280,7 +280,7 @@ SELECT
 FROM
   (SELECT
       customer_state,
-      ROUND(AVG(timestamp_diff(order_estimated_delivery_date, order_delivered_customer_date, day)), 2) as  avg_delivery_days,
+      ROUND(AVG(timestamp_diff(order_estimated_delivery_date, order_delivered_customer_date, day)), 2) AS  avg_delivery_days,
       DENSE_RANK() OVER (ORDER BY ROUND(AVG(timestamp_diff(order_estimated_delivery_date, order_delivered_customer_date, day)), 2) DESC) AS highest_rank
     FROM
       `target.customer` c
@@ -298,7 +298,7 @@ JOIN
   (
     SELECT
       customer_state,
-      ROUND(AVG(timestamp_diff(order_estimated_delivery_date, order_delivered_customer_date, day)), 2) as  avg_delivery_days,
+      ROUND(AVG(timestamp_diff(order_estimated_delivery_date, order_delivered_customer_date, day)), 2) AS  avg_delivery_days,
       DENSE_RANK() OVER (ORDER BY ROUND(AVG(timestamp_diff(order_estimated_delivery_date, order_delivered_customer_date, day)), 2) ASC) AS lowest_rank
     FROM
       `target.customer` c
@@ -350,7 +350,7 @@ ORDER BY
 
 SELECT 
   payment_type,
-  COUNT(*) as total_orders
+  COUNT(*) AS total_orders
 FROM 
   `target.payments`
 GROUP BY 
@@ -383,18 +383,18 @@ ORDER BY
 
 SELECT 
   T.order_year,
-  FORMAT_DATE('%B', DATE(2017, order_month, 1)) as order_month,
+  FORMAT_DATE('%B', DATE(2017, order_month, 1)) AS order_month,
   avg_payment,
   R.order_year,
-  FORMAT_DATE('%B', DATE(2018, order_month, 1)) as order_month,
+  FORMAT_DATE('%B', DATE(2018, order_month, 1)) AS order_month,
   next_avg_payment,
   ROUND(((next_avg_payment- avg_payment)/avg_payment) * 100, 2) AS per_change
 FROM
   (
     SELECT 
-      EXTRACT(YEAR FROM order_purchase_timestamp) as order_year,
-      EXTRACT(month FROM order_purchase_timestamp) AS order_month,
-      ROUND(AVG(payment_value)) as avg_payment
+      EXTRACT(YEAR FROM order_purchase_timestamp) AS order_year,
+      EXTRACT(MONTH FROM order_purchase_timestamp) AS order_month,
+      ROUND(AVG(payment_value)) AS avg_payment
     FROM
       `target.orders` o
     JOIN
@@ -410,9 +410,9 @@ FROM
 JOIN 
   (
     SELECT 
-      EXTRACT(YEAR FROM order_purchase_timestamp) as order_year,
-      EXTRACT(month FROM order_purchase_timestamp) AS order_month,
-      ROUND(AVG(payment_value)) as next_avg_payment
+      EXTRACT(YEAR FROM order_purchase_timestamp) AS order_year,
+      EXTRACT(MONTH FROM order_purchase_timestamp) AS order_month,
+      ROUND(AVG(payment_value)) AS next_avg_payment
     FROM
       `target.orders` o
     JOIN
