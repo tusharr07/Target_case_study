@@ -5,8 +5,8 @@ SELECT *,
 FROM
 (
   SELECT
-    min(extract(date from order_purchase_timestamp)) first_order_date,
-    max(extract(date from order_purchase_timestamp)) last_order_date,
+    MIN(extract(date from order_purchase_timestamp)) first_order_date,
+    MAX(extract(date from order_purchase_timestamp)) last_order_date,
   FROM `target.orders`
 )t;
 
@@ -14,7 +14,7 @@ FROM
 
 
 
-# Total no. of Cities & States of customers from where orders are coming during the given period.
+# Total no. of Cities & States of customers from where orders are coming.
 
 SELECT
   COUNT(distinct customer_state) AS total_state,
@@ -56,24 +56,24 @@ FROM `target.orders`
 GROUP BY 
   month_name
 ORDER BY
-  order_count desc;
+  order_count DESC;
 
 -- Order volume shows seasonal peaks in August, May and July.
 
 
 
-#During what time of the day, do the Brazilian customers mostly place their orders?
+# During what time of the day, the customers mostly place their orders?
 
 SELECT 
   (CASE 
-    WHEN EXTRACT(hour from order_purchase_timestamp) BETWEEN 7 and 12 then 'Morining'
-    WHEN EXTRACT(hour from order_purchase_timestamp) BETWEEN 13 and 18 then 'Afternoon'
-    WHEN EXTRACT(hour from order_purchase_timestamp) BETWEEN 19 and 23 then 'Evening'
-    WHEN EXTRACT(hour from order_purchase_timestamp) BETWEEN 0 and 3 then 'Night'
-  else 'Dawn' 
-  end) as order_time,
-  count(*) as order_count
- FROM
+    WHEN EXTRACT(hour from order_purchase_timestamp) BETWEEN 7 and 12 THEN 'Morining'
+    WHEN EXTRACT(hour from order_purchase_timestamp) BETWEEN 13 and 18 THEN 'Afternoon'
+    WHEN EXTRACT(hour from order_purchase_timestamp) BETWEEN 19 and 23 THEN 'Evening'
+    WHEN EXTRACT(hour from order_purchase_timestamp) BETWEEN 0 and 3 THEN 'Night'
+   else 'Dawn' 
+   end) AS order_time,
+  count(*) AS order_count
+FROM
   `target.orders`
 GROUP BY 
   order_time
@@ -88,7 +88,7 @@ ORDER BY
 
 SELECT 
   customer_state,
-  count(distinct customer_id) as Cust_count
+  COUNT(distinct customer_id) AS Cust_count
 FROM `target.customer`
 GROUP BY 
   customer_state
@@ -99,7 +99,8 @@ ORDER BY
 
 
 
-# Month on month no. of orders placed in each state.
+# Month on month no. of orders placed in each state. 
+
 SELECT 
   customer_state,
   FORMAT_DATE('%B', order_purchase_timestamp) AS order_month,
@@ -124,7 +125,7 @@ ORDER BY
 SELECT 
   customer_state,
   ROUND(SUM(price)) AS total_order_value,
-  ROUND(AVG(price)) as avg_order_value
+  ROUND(AVG(price)) AS avg_order_value
 FROM 
   `target.customer` c
 JOIN 
@@ -145,7 +146,7 @@ GROUP BY
 SELECT 
   customer_state,
   ROUND(SUM(freight_value)) AS total_fright_value,
-  ROUND(AVG(freight_value)) as avg_fright_value
+  ROUND(AVG(freight_value)) AS avg_fright_value
 FROM 
   `target.customer` c
 JOIN 
@@ -320,13 +321,15 @@ ON
 
 SELECT 
   order_id,
-  TIMESTAMP_DIFF(order_delivered_customer_date, order_purchase_timestamp, day) as deliver_time , 
-  TIMESTAMP_DIFF(order_estimated_delivery_date, order_delivered_customer_date, day) as act_est_diff
-from 
-  `target.orders`;
+  TIMESTAMP_DIFF(order_delivered_customer_date, order_purchase_timestamp, day) AS deliver_time , 
+  TIMESTAMP_DIFF(order_estimated_delivery_date, order_delivered_customer_date, day) AS act_est_diff
+FROM
+  `target.orders`
+GROUP BY 
+  customer_state;
 
 
-# Distribution of orders across different payment installment options
+# Distribution of orders across different payment installment options.
 
 SELECT 
   payment_installments,
@@ -347,9 +350,9 @@ ORDER BY
 
 SELECT 
   payment_type,
-  count(*) as total_orders
+  COUNT(*) as total_orders
 FROM 
-  target.payments
+  `target.payments`
 GROUP BY 
   payment_type;
 
@@ -379,16 +382,19 @@ ORDER BY
 # Percentage increase in the cost of orders from year 2017 to 2018 (include months between Jan to Aug only).
 
 SELECT 
+  T.order_year,
+  FORMAT_DATE('%B', DATE(2017, order_month, 1)) as order_month,
+  avg_payment,
+  R.order_year,
   FORMAT_DATE('%B', DATE(2018, order_month, 1)) as order_month,
-  prev_payment,
-  next_payment,
-  ROUND(((next_payment- prev_payment)/prev_payment) * 100, 2) AS per_change
+  next_avg_payment,
+  ROUND(((next_avg_payment- avg_payment)/avg_payment) * 100, 2) AS per_change
 FROM
   (
     SELECT 
       EXTRACT(YEAR FROM order_purchase_timestamp) as order_year,
       EXTRACT(month FROM order_purchase_timestamp) AS order_month,
-      ROUND(SUM(payment_value)) as prev_payment
+      ROUND(AVG(payment_value)) as avg_payment
     FROM
       `target.orders` o
     JOIN
@@ -406,7 +412,7 @@ JOIN
     SELECT 
       EXTRACT(YEAR FROM order_purchase_timestamp) as order_year,
       EXTRACT(month FROM order_purchase_timestamp) AS order_month,
-      ROUND(SUM(payment_value)) as next_payment
+      ROUND(AVG(payment_value)) as next_avg_payment
     FROM
       `target.orders` o
     JOIN
@@ -423,3 +429,5 @@ USING
     (order_month)
 ORDER BY
   per_change desc;
+
+
