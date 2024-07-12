@@ -6,3 +6,10 @@ This particular business case focuses on the operations of Target in Brazil and 
 
 ## Business Problem
 Analyze regional sales data to identify areas underperforming and Improve online sales performance. Explore product categories or demographics needing a boost.
+
+## Tools Used 
+- SQL
+- BIG QUERY
+- TABLEAU
+
+## 
