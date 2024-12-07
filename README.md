@@ -1,6 +1,7 @@
 # TARGET CASE STUDY
 
-![Uploading image.png…]()
+![image](https://github.com/user-attachments/assets/84e48f98-6383-44b5-a34b-ac2d2d91bdd4)
+
 
 
 ## About the dataset
