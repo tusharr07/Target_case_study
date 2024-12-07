@@ -16,4 +16,5 @@ Analyze regional sales data to identify areas underperforming and improve online
 - BIG QUERY
 - TABLEAU
 
-## 
+## Business Insights & Recommendations
+
