@@ -1,6 +1,7 @@
 # TARGET CASE STUDY
 
-![image](https://github.com/user-attachments/assets/9c83478f-9238-4b95-b5e6-d954abe6f7ba)
+![Uploading image.png…]()
+
 
 ## About the dataset
 Target is a globally renowned brand and a prominent retailer in the United States. 
